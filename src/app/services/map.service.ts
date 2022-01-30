@@ -170,11 +170,11 @@ MacRitchie Reservoir Park <br/>Singapore 298717
       source: "locations",
       paint: {
         'circle-radius': {
-          'base': 5,
-          'stops': [[5, 5], [15, 250]]
+          'base': 10,
+          'stops': [[5, 15], [15, 250]]
         },
         'circle-color': ' #91c949',
-        'circle-opacity': 0.75,
+        'circle-opacity': 0.5,
       }
     });
 
