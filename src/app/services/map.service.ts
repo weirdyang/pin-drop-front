@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { mapboxToken } from '../config';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import mapboxgl, { ExpressionSpecification, GeoJSONSource, StyleFunction } from 'mapbox-gl';
+import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreatePinComponent } from '../pin/create-pin/create-pin.component';
@@ -23,7 +23,16 @@ export class MapService {
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxToken,
       mapboxgl: this.map as mapboxgl.Map,
-      marker: false
+      marker: false,
+      flyTo: {
+        speed: 0.5,
+        curve: 1,
+        padding: 15, // If you want some minimum space around your result
+        easing: function (t) {
+          return t;
+        },
+        maxZoom: 10, // If you want your result not to go further than a specific zoom
+      }
     });
     this.map.addControl(geocoder, "top-right");
     //set up draggable to respond to geocoder search
@@ -79,6 +88,7 @@ export class MapService {
       .afterClosed()
       .subscribe(result => {
         this.lastMarker.remove();
+        this.map.zoomTo(6);
         if (result) {
           this.snack.open(result, 'OK');
         }
@@ -170,8 +180,8 @@ MacRitchie Reservoir Park <br/>Singapore 298717
       source: "locations",
       paint: {
         'circle-radius': {
-          'base': 10,
-          'stops': [[5, 15], [15, 250]]
+          'base': 1.75,
+          'stops': [[12, 15], [22, 180]]
         },
         'circle-color': ' #91c949',
         'circle-opacity': 0.5,
