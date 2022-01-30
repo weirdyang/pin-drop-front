@@ -13,7 +13,7 @@ import { InstantErrorStateMatcher } from 'src/app/core/validators';
   templateUrl: './create-pin.component.html',
   styleUrls: ['./create-pin.component.scss']
 })
-export class CreatePinComponent implements OnInit {
+export class CreatePinComponent {
   noteMatcher = new InstantErrorStateMatcher();
   pin?: IPinNew;
   form!: FormGroup;
@@ -93,8 +93,6 @@ export class CreatePinComponent implements OnInit {
   }
   dismiss() {
     this.dialogRef.close();
-  }
-  ngOnInit(): void {
   }
 
 }

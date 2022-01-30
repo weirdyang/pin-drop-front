@@ -106,9 +106,21 @@
             ],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
-  "defaultProject": "pin-drop-front"
+  "defaultProject": "pin-drop-front",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }
