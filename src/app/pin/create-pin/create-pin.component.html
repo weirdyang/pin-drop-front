@@ -39,7 +39,7 @@
             <mat-datepicker #from></mat-datepicker>
         </mat-form-field>
         <mat-form-field appearance="fill">
-            <mat-label>From</mat-label>
+            <mat-label>To</mat-label>
             <input matInput
                 formControlName="to"
                 [min]="minDate"
@@ -53,6 +53,7 @@
             <mat-label>Note</mat-label>
             <textarea matInput
                 [rows]="8"
+                [errorStateMatcher]="noteMatcher"
                 formControlName="note"
                 placeholder="eg.preferences, why you're there"></textarea>
             <mat-hint align="end">{{form.get('note')?.value?.length || 0}}/140</mat-hint>

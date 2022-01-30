@@ -7,12 +7,14 @@ import { MapService } from 'src/app/services/map.service';
 import { IPin, IPinNew } from 'src/app/types/pin';
 import { IErrorMessage } from 'src/app/types/http-error';
 import { PinService } from 'src/app/services/pin.service';
+import { InstantErrorStateMatcher } from 'src/app/core/validators';
 @Component({
   selector: 'app-create-pin',
   templateUrl: './create-pin.component.html',
   styleUrls: ['./create-pin.component.scss']
 })
 export class CreatePinComponent implements OnInit {
+  noteMatcher = new InstantErrorStateMatcher();
   pin?: IPinNew;
   form!: FormGroup;
   get password() {
