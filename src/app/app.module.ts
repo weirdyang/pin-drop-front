@@ -8,7 +8,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -28,15 +28,13 @@ import { HttpClientModule } from '@angular/common/http';
     MatIconModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatOptionModule,
-    MatSelectModule,
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
     MatSnackBarModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [{ provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
