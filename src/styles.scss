@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+@import './styles/mat-theme';
+@import './styles/normalize';
+@import './styles/mapbox-gl.css';
+@import './styles/mapbox-popup';
+@import '~@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

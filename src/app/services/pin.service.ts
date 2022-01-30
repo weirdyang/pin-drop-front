@@ -1,0 +1,45 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { IPinNew, IPinData } from '../types/pin';
+import { IApiResponse } from '../types/http-error';
+@Injectable({
+  providedIn: 'root'
+})
+export class PinService {
+
+  constructor(private http: HttpClient) { }
+
+  apiUrl = environment.apiUrl;
+  createPin(formData: FormData) {
+
+    return this.http.post(`${this.apiUrl}/pin`, formData)
+      .pipe(
+        catchError(error => this.handleError(error))
+      )
+  }
+  getPins() {
+    return this.http.get(`${this.apiUrl}/pin`)
+      .pipe(
+        catchError(error => this.handleError(error))
+      )
+  }
+  private handleError(err: HttpErrorResponse): Observable<never> {
+    // in a real world app, we may send the server to some remote logging infrastructure
+    // instead of just logging it to the console
+    let errorMessage = '';
+    if (err.error instanceof ErrorEvent) {
+      // A client-side or network error occurred. Handle it accordingly.
+      errorMessage = `An error occurred: ${err.error.message}`;
+    } else {
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong,
+      errorMessage = `Server returned code: ${err.status}, error message is: ${err.message}`;
+    }
+    return throwError(err);
+  }
+}
+
+

@@ -1,0 +1,28 @@
+@mixin styled-scrollbar {
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+      width: 3em;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: var(--shadow-3);
+      opacity: 0.2;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--shadow-1);
+      outline: 0.25rem var(--shadow-1);
+    }
+  }
+  @mixin hide-scrollbar {
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    &::-webkit-scrollbar {
+      /* WebKit */
+      width: 0;
+      height: 0;
+    }
+  }

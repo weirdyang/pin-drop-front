@@ -1,0 +1,76 @@
+<div *ngIf="isSubmitting"
+    class="loader">
+</div>
+<ng-container *ngIf="!isSubmitting">
+    <h2 mat-dialog-title>Login</h2>
+    <mat-dialog-content class="dialog-container"
+        [formGroup]="form">
+        <mat-form-field appearance="fill">
+            <mat-label>Username</mat-label>
+            <input matInput
+                type="text"
+                formControlName="username"
+                placeholder="Username">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Password</mat-label>
+            <input matInput
+                formControlName="key"
+                [type]="hide ? 'password' : 'text'"
+                placeholder="password">
+            <button mat-icon-button
+                matSuffix
+                (click)="hide = !hide"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hide">
+                <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="password?.invalid && !password?.hasError('required')">Password must be at least 8
+                characters</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>From</mat-label>
+            <input matInput
+                formControlName="from"
+                [matDatepicker]="from"
+                [max]="maxDate">
+            <mat-datepicker-toggle matSuffix
+                [for]="from"></mat-datepicker-toggle>
+            <mat-datepicker #from></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>From</mat-label>
+            <input matInput
+                formControlName="to"
+                [min]="minDate"
+                [matDatepicker]="to">
+            <mat-datepicker-toggle matSuffix
+                [for]="to"></mat-datepicker-toggle>
+            <mat-datepicker #to></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="fill"
+            class="form-item">
+            <mat-label>Note</mat-label>
+            <textarea matInput
+                [rows]="8"
+                formControlName="note"
+                placeholder="eg.preferences, why you're there"></textarea>
+            <mat-hint align="end">{{form.get('note')?.value?.length || 0}}/140</mat-hint>
+        </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-raised-button
+            color="primary"
+            [disabled]="!form.valid"
+            (click)="submit()">
+            <mat-icon>check_circle</mat-icon>
+        </button>
+        <button mat-raised-button
+            color="warn"
+            (click)="dismiss()">
+            <mat-icon>
+                cancel
+            </mat-icon>
+        </button>
+    </mat-dialog-actions>
+</ng-container>
