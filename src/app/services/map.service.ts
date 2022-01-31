@@ -9,6 +9,8 @@ import { Subscription } from 'rxjs';
 import { PinService } from './pin.service';
 import { IPinData } from '../types/pin';
 import * as GeoJSON from 'geojson'
+import { DynamicComponentService } from './dynamic-component.service';
+import { PopUpComponent } from '../pin/pop-up/pop-up.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -98,7 +100,8 @@ export class MapService {
   constructor(
     public dialog: MatDialog,
     private snack: MatSnackBar,
-    private pinService: PinService) {
+    private pinService: PinService,
+    private dynamic: DynamicComponentService) {
 
   }
   formatDate(date: string) {
@@ -124,10 +127,16 @@ export class MapService {
     var popUps = document.getElementsByClassName('mapboxgl-popup');
     /** Check if there is already a popup on the map and if so, remove it */
     if (popUps[0]) popUps[0].remove();
+    const content = this.dynamic.injectComponent(PopUpComponent,
+      x => x.model = currentFeature.properties as IPinData);
+    // new mapboxgl.Popup({ closeOnClick: true })
+    //   .setLngLat(currentFeature.geometry.coordinates)
+    //   .setHTML(this.constructPopup(currentFeature.properties as IPinData))
+    //   .addTo(this.map);
 
-    var popup = new mapboxgl.Popup({ closeOnClick: true })
+    new mapboxgl.Popup({ closeOnClick: true })
       .setLngLat(currentFeature.geometry.coordinates)
-      .setHTML(this.constructPopup(currentFeature.properties as IPinData))
+      .setDOMContent(content)
       .addTo(this.map);
   }
   // long, lat

@@ -1,3 +1,4 @@
+@use 'sass:map';
 @use '~@angular/material' as mat;
 @import './variables';
 @include mat.core();
@@ -41,5 +42,12 @@ $dark-theme: mat.define-dark-theme((
 // to an ancestor element of the components (such as `body`).
 .light {
  @include mat.all-component-colors($light-theme);
-
 }
+
+$color-config:    mat.get-color-config($dark-theme);
+$primary-palette: map.get($color-config, 'primary');
+$accent-palette:  map.get($color-config, 'accent');
+$warn-palette:    map.get($color-config, 'warn');
+$is-dark-theme:   map.get($color-config, 'is-dark');
+$background: map.get($color-config, 'background');
+$background-color: map.get($background, 'background');

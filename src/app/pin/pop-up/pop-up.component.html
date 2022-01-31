@@ -1,0 +1,15 @@
+<mat-card class="example-card">
+    <mat-card-title>{{ model.username }}</mat-card-title>
+
+    <mat-card-subtitle>
+        From: {{ from }} <br />
+        To: {{to }}
+    </mat-card-subtitle>
+    <mat-divider inset="true"></mat-divider>
+    <mat-card-content *ngIf="model.note">
+        <p>{{ model.note }}</p>
+    </mat-card-content>
+    <mat-card-footer>
+        Created at {{ created }}
+    </mat-card-footer>
+</mat-card>
