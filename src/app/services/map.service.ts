@@ -94,23 +94,6 @@ export class MapService {
         }
       });
   }
-  addMarker() {
-    console.log(this.map);
-    const el = document.createElement("div");
-    el.className = "marker";
-    new mapboxgl.Marker()
-      .setLngLat(this.center)
-      .setPopup(
-        new mapboxgl.Popup({ offset: 25 }).setHTML( // add popups
-          `
-      <h3>Find us here!</h3>
-      <h4>
-MacRitchie Nature Trail & Reservoir Park<br/>
-MacRitchie Reservoir Park <br/>Singapore 298717
-      </h4>`)
-      )
-      .addTo(this.map);
-  }
 
   constructor(
     public dialog: MatDialog,
@@ -132,7 +115,6 @@ MacRitchie Reservoir Park <br/>Singapore 298717
   }
   formatNote(note: string) {
     return `
-      <span>Note</span>
       <span class="note">
       ${note}
       </span>
