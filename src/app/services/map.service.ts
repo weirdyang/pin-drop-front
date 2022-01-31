@@ -25,7 +25,7 @@ export class MapService {
       mapboxgl: this.map as mapboxgl.Map,
       marker: false,
       flyTo: {
-        speed: 0.5,
+        speed: 0.8,
         curve: 1,
         padding: 15, // If you want some minimum space around your result
         easing: function (t) {
