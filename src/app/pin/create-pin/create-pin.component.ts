@@ -8,6 +8,7 @@ import { IPin, IPinNew } from 'src/app/types/pin';
 import { IErrorMessage } from 'src/app/types/http-error';
 import { PinService } from 'src/app/services/pin.service';
 import { InstantErrorStateMatcher } from 'src/app/core/validators';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-create-pin',
   templateUrl: './create-pin.component.html',
@@ -24,7 +25,7 @@ export class CreatePinComponent {
     return this.form.get('username');
   }
   get minDate() {
-    return new Date();
+    return new Date(new Date().toDateString());
   }
   get maxDate() {
     return this.form.get('to')?.value;
@@ -46,20 +47,22 @@ export class CreatePinComponent {
       long: latLng.lng,
       key: '',
       to: new Date(new Date().getFullYear() + 1, 0, 1),
-      from: new Date()
+      from: this.minDate
     }
     this.form = this.fb.group({
       username: [this.pin?.username, [Validators.required]],
       key: [this.pin?.key, [Validators.required]],
       lat: this.pin.lat,
       long: this.pin.long,
-      to: new Date(new Date().getFullYear() + 1, 0, 1),
-      from: new Date(),
+      to: this.pin.to,
+      from: this.pin.from,
       note: [this.pin.note, [Validators.maxLength(140)]]
     })
   }
   submit() {
     this.isSubmitting = true;
+    console.log(this.form.value);
+
     this.pinService.createPin(this.form.value)
       .subscribe({
         next: response => {
@@ -69,23 +72,16 @@ export class CreatePinComponent {
 
           this.dialogRef.close();
         },
-        error: err => {
+        error: (err: HttpErrorResponse) => {
 
           this.isSubmitting = false;
           const { error } = err;
-
           let errorMessage = '';
-          if (error.message) {
-            errorMessage += error.message;
+          if (error instanceof ErrorEvent) {
+            errorMessage = 'Please try submitting again';
           }
-          if (error.additionalInfo && error.additionalInfo.length) {
-            console.error(error);
-            error.additionalInfo.forEach((element: IErrorMessage) => {
-              errorMessage += `\n${element.error}`;
-            });
-          }
-          if (errorMessage.trim().length === 0) {
-            errorMessage = 'This is unexpected, please contact support'
+          else {
+            errorMessage = error.message;
           }
           this.snackBar.open(errorMessage, 'OK')
         }

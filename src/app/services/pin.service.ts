@@ -33,11 +33,13 @@ export class PinService {
     if (err.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
       errorMessage = `An error occurred: ${err.error.message}`;
+
     } else {
       // The backend returned an unsuccessful response code.
       // The response body may contain clues as to what went wrong,
       errorMessage = `Server returned code: ${err.status}, error message is: ${err.message}`;
     }
+    console.error(errorMessage)
     return throwError(err);
   }
 }
