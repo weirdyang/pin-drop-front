@@ -27,6 +27,7 @@ export class MapService {
   map!: mapboxgl.Map;
   initialZoom = 3;
   geocoder!: MapboxGeocoder;
+  localSearch!: MapboxGeocoder;
   dialogSubscription?: Subscription;
   lastMarker: mapboxgl.Marker = new mapboxgl.Marker();
   geoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
@@ -144,13 +145,8 @@ export class MapService {
       this.createPopUp(clickedPoint);
     });
   }
-  userResults: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties> = {
-    type: 'FeatureCollection',
-    features: []
-  };
+
   addLayerAndSources() {
-
-
     this.map.addSource("locations", { type: "geojson", data: this.geoJson });
     this.map.addLayer({
       id: "singles",
@@ -207,7 +203,7 @@ export class MapService {
   getGeoJSON() {
     return this.geoJson;
   }
-  localSearch!: MapboxGeocoder
+
   refreshLocalSearch() {
     this.map.removeControl(this.localSearch);
     this.addLocalSearch();
