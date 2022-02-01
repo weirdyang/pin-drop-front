@@ -11,13 +11,16 @@ export class AppComponent implements OnInit {
 
 
   constructor(private mapService: MapService) { }
-  flyToStore() {
-    this.mapService.flyToStore();
+  resetMap() {
+    this.mapService.resetMap();
   }
 
   ngOnInit(): void {
     this.mapService.constructMap();
 
     this.mapService.addGeocoder();
+    console.log(this.mapService.geoJson);
+    this.mapService.addLocalSearch();
+
   }
 }

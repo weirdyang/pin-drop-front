@@ -69,7 +69,7 @@ export class CreatePinComponent {
           this.snackBar.open('Pin created!')
           this.mapService.lastMarker.remove();
           this.mapService.getMarkers();
-
+          this.mapService.refreshLocalSearch();
           this.dialogRef.close();
         },
         error: (err: HttpErrorResponse) => {
