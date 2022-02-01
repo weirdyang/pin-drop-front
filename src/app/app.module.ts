@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
+import { PopUpModule } from './pin/pop-up/pop-up.module';
 
 
 @NgModule({
@@ -32,7 +33,8 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     MatInputModule,
     MatSnackBarModule,
-    HttpClientModule
+    HttpClientModule,
+    PopUpModule
   ],
   providers: [{ provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }],
   bootstrap: [AppComponent]

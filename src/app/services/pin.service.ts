@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { IPinNew, IPinData } from '../types/pin';
-import { IApiResponse } from '../types/http-error';
+
 @Injectable({
   providedIn: 'root'
 })
