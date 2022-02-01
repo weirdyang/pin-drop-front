@@ -19,6 +19,27 @@ export class PopUpComponent {
     return this.formatDate(this.model.to.toString());
   }
   get created() {
-    return this.formatDate(this.model.updatedAt.toString());
+    return new Date(this.model.updatedAt).toDateString();
+  }
+
+  get start() {
+    return new Date(this.model.from);
+  }
+  get end() {
+    return new Date(this.model.to)
+  }
+
+  getDay(date: Date) {
+    return date
+      .toLocaleString('default', { day: 'numeric' })
+      .padStart(2, '0')
+  }
+  getMonth(date: Date) {
+    return date
+      .toLocaleString('default', { month: 'short' })
+  }
+  getYear(date: Date) {
+    return date
+      .toLocaleString('default', { year: 'numeric' })
   }
 }

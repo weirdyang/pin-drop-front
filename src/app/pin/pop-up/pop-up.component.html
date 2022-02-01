@@ -1,27 +1,42 @@
 <div class="event">
     <div class="event-header">
         <div class="event-start">
-            <div class="event-start-date">13</div>
-            <div class="event-start-month"><small>sep</small></div>
-            <div class="event-start-year"><small>2022</small></div>
+            <div class="event-start-date">
+                {{ getDay(start) }}
+            </div>
+            <div class="event-start-month">
+                <small>{{ getMonth(start) }}</small>
+            </div>
+            <div class="event-start-year"><small>
+                    {{ getYear(start) }}</small>
+            </div>
         </div>
-        <div class="event-date-divider">
-            -&nbsp;
-        </div>
-        <div class="event-end">
-            <div class="event-end-date">15</div>
-            <div class="event-end-month"><small>sep</small></div>
-            <div class="event-end-year"><small>2022</small></div>
-        </div>
+        <ng-container *ngIf="start < end">
+            <div class="event-date-divider">
+                -&nbsp;
+            </div>
+            <div class="event-end">
+                <div class="event-end-date">{{ getDay(end) }}
+                </div>
+                <div class="event-end-month"><small>{{ getMonth(end) }}</small>
+                </div>
+                <div class="event-end-year"><small>{{ getYear(end) }}</small>
+                </div>
+            </div>
+        </ng-container>
+
         <div class="event-name">
-            hi
+            {{ model.username }}
         </div>
     </div>
-    <div class="event-notes">
-        The box-sizing property defines how the width and height of an element are calculated: should they include
-        padding and borders, or not.
-    </div>
+    <ng-container *ngIf="model.note">
+        <hr class="divider">
+        <div class="event-notes">
+            {{ model.note }}
+        </div>
+    </ng-container>
+
     <div class="event-footer">
-        Added on 22 Jan 2022
+        Added on {{created}}
     </div>
 </div>

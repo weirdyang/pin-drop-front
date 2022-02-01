@@ -4,7 +4,15 @@
     --background: #{$background-color};
     --background-text: #dad6d6;
 }
-
+.divider {
+    color: var(--background-text);
+    background-color: var(--background-text);
+    height: 1px;
+    border: none;
+    width: 100%;
+    opacity: 0.8;
+    margin-top: -0.25rem;
+}
 .event {
     width: 250px;
     display: flex;
@@ -34,10 +42,12 @@
       display: grid;
       place-items: center;
       margin-left: auto;
+      word-break: break-all;
     }
     &-notes {
       padding-left:1rem;
       text-align: justify;
+      word-break: break-all;
     }
     &-footer {
       font-size: 0.6rem;
