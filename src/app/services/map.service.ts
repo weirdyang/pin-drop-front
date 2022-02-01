@@ -241,21 +241,26 @@ export class MapService {
     function forwardGeocoder(query: string) {
       console.log(query)
       const matchingFeatures = [] as Result[];
+      const uniqueNames: string[] = [];
       for (const feature of data.features) {
+        let current = feature.properties?.username.toLowerCase();
+        if (uniqueNames.find(x => x.toLowerCase() === current)) {
+          continue
+        }
         if (
-          feature?.properties?.username
-            .toLowerCase()
+          current
             .includes(query.toLowerCase())
         ) {
 
           const result = feature as Result;
           // https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
-          result['place_name'] = `${feature.properties.username}`;
+          result['place_name'] = `${feature.properties?.username}`;
           const point = feature.geometry as GeoJSON.Point;
           result['center'] = point.coordinates;
           result['place_type'] = ['user'];
           matchingFeatures.push(result);
-          break;
+          uniqueNames.push(current);
+
         }
       }
       return matchingFeatures;
