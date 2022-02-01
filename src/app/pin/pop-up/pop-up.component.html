@@ -1,15 +1,27 @@
-<mat-card class="example-card">
-    <mat-card-title>{{ model.username }}</mat-card-title>
-
-    <mat-card-subtitle>
-        From: {{ from }} <br />
-        To: {{to }}
-    </mat-card-subtitle>
-    <mat-divider inset="true"></mat-divider>
-    <mat-card-content *ngIf="model.note">
-        <p>{{ model.note }}</p>
-    </mat-card-content>
-    <mat-card-footer>
-        Created at {{ created }}
-    </mat-card-footer>
-</mat-card>
+<div class="event">
+    <div class="event-header">
+        <div class="event-start">
+            <div class="event-start-date">13</div>
+            <div class="event-start-month"><small>sep</small></div>
+            <div class="event-start-year"><small>2022</small></div>
+        </div>
+        <div class="event-date-divider">
+            -&nbsp;
+        </div>
+        <div class="event-end">
+            <div class="event-end-date">15</div>
+            <div class="event-end-month"><small>sep</small></div>
+            <div class="event-end-year"><small>2022</small></div>
+        </div>
+        <div class="event-name">
+            hi
+        </div>
+    </div>
+    <div class="event-notes">
+        The box-sizing property defines how the width and height of an element are calculated: should they include
+        padding and borders, or not.
+    </div>
+    <div class="event-footer">
+        Added on 22 Jan 2022
+    </div>
+</div>
