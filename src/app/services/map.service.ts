@@ -247,11 +247,7 @@ export class MapService {
         if (uniqueNames.find(x => x.toLowerCase() === current)) {
           continue
         }
-        if (
-          current
-            .includes(query.toLowerCase())
-        ) {
-
+        if (current.includes(query.toLowerCase())) {
           const result = feature as Result;
           // https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
           result['place_name'] = `${feature.properties?.username}`;
@@ -305,7 +301,6 @@ export class MapService {
           const point = x.geometry as GeoJSON.Point;
           return point.coordinates;
         });
-
       // alternative using querySourceFeatures
       // const test = this.map.querySourceFeatures('locations', {
       //   filter: ['in', 'username', result.properties.username]
@@ -313,9 +308,7 @@ export class MapService {
       // const unique = this.getUniqueFeatures(test, '_id');
       // //
       // console.log(test);
-
       const start = userLocations[0];
-
       if (userLocations.length > 1) {
         const startLngLat = new mapboxgl.LngLat(start[0], start[1]);
 
