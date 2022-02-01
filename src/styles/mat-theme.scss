@@ -53,3 +53,6 @@ $background: map.get($color-config, 'background');
 $foreground: map.get($color-config, 'foreground');
 $background-color: map.get($background, 'background');
 $background-text: map.get($background, 'color');
+:root {
+  --background: #{$background-color};
+}
