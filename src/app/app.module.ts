@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { PopUpModule } from './pin/pop-up/pop-up.module';
+import { MapModule } from './map/map.module';
 
 
 @NgModule({
@@ -34,7 +35,8 @@ import { PopUpModule } from './pin/pop-up/pop-up.module';
     MatInputModule,
     MatSnackBarModule,
     HttpClientModule,
-    PopUpModule
+    PopUpModule,
+    MapModule
   ],
   providers: [{ provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 2500 } }],
   bootstrap: [AppComponent]
