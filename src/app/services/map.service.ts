@@ -200,10 +200,6 @@ export class MapService {
     });
   }
 
-  getGeoJSON() {
-    return this.geoJson;
-  }
-
   refreshLocalSearch() {
     this.map.removeControl(this.localSearch);
     this.addLocalSearch();
@@ -271,7 +267,7 @@ export class MapService {
     // Add the control to the map.
     this.map.addControl(
       this.localSearch,
-      'top-left'
+      'bottom-right'
     );
     this.localSearch.on('clear', () => {
       this.resetMap();
