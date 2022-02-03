@@ -24,13 +24,13 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.mapService.constructMap(
+
+    this.mapService.updateSettings(
       this.mapContainerId,
       this.mapStyle
     );
-
     this.readySubscription =
-      this.mapService.setUpMap$.pipe(
+      this.mapService.createMap$.pipe(
         takeUntil(this.destroy$)
       ).subscribe();
     this.refreshSubscription =

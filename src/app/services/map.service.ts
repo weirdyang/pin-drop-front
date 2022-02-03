@@ -11,7 +11,7 @@ import { IPinData } from '../types/pin';
 import * as GeoJSON from 'geojson'
 import { DynamicComponentService } from './dynamic-component.service';
 import { PopUpComponent } from '../pin/pop-up/pop-up.component';
-import { catchError, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 
 
 @Injectable({
@@ -57,13 +57,11 @@ export class MapService {
   }
   refreshData$ = this.update$.pipe(
     filter(x => x === true),
-    tap(x => console.log('update', x)),
     switchMap(() =>
       this.markers$.pipe(
         tap((data) => {
           const source = this.map.getSource('locations') as GeoJSONSource;
           source.setData(data);
-          console.log(data, 'update');
           this.refreshLocalSearch();
         })
       )
@@ -101,15 +99,31 @@ export class MapService {
 
   markers$ = this.pinService.pins$
     .pipe(map(data => {
-      console.log(data, 'markers');
+
       const geoJson = {
         type: 'FeatureCollection',
         features: [] as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
       } as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+      const points: number[][] = [];
       for (let point of data as IPinData[]) {
         let coordinate = [point.long, point.lat];
         if (point.lat > 90 || point.lat < -90) {
           continue;
+        }
+        if (points.find(x => x[0] === point.long && x[1] === point.lat)) {
+          let latRnd = Math.random() * 0.001;
+          let longRnd = Math.random() * 0.001;
+          if (Date.now() % 2 === 0) {
+            coordinate = [
+              point.long + longRnd,
+              point.lat + latRnd,
+            ]
+          } else {
+            coordinate = [
+              point.long - longRnd,
+              point.lat - latRnd,
+            ]
+          }
         }
         let feature = {
           type: "Feature",
@@ -121,8 +135,9 @@ export class MapService {
         } as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>;
         geoJson.features.push(
           feature as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>);
+        points.push(coordinate);
       }
-      console.log(data, 'after process')
+
       this.geoJsonSubject.next(geoJson);
       return geoJson
     }))
@@ -162,12 +177,17 @@ export class MapService {
   }
   // long, lat
   center: mapboxgl.LngLatLike = [73, 42];
-  constructMap(divId: string = 'map', style = "mapbox://styles/mapbox/light-v10") {
-    console.log('constructing map')
+  containerId = 'map';
+  mapStyle = 'mapbox://styles/mapbox/light-v10';
+  updateSettings(id: string, style: string) {
+    this.containerId = id;
+    this.mapStyle = style;
+  }
+  constructMap() {
     this.map = new mapboxgl.Map({
       accessToken: mapboxToken,
-      container: divId,
-      style: style,
+      container: this.containerId,
+      style: this.mapStyle,
       center: this.center,
       zoom: this.initialZoom
     });
@@ -188,7 +208,6 @@ export class MapService {
       filter(ready => ready === true),
       switchMap(ready =>
         this.markers$.pipe(
-          tap(x => console.log(x)),
           tap(x => this.addLayerAndSources(x)),
           tap(_ => this.addGeocoder()),
           tap(x => this.addLocalSearch(x)),
@@ -197,7 +216,25 @@ export class MapService {
         )
       )
     )
+
+  createMap$ = this.markers$.pipe(
+    tap(_ => this.constructMap()),
+    switchMap(() =>
+      this.ready$.pipe(
+        filter(ready => ready === true),
+        tap(x => {
+
+          this.addLayerAndSources(this.geoJsonSubject.value);
+          this.addGeocoder();
+          this.addLocalSearch(this.geoJsonSubject.value);
+          this.setupMarkers();
+          this.setUpSubject.next(true);
+        })
+      )
+    )
+  )
   addLayerAndSources(geoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry>) {
+
     this.map.addSource("locations", { type: "geojson", data: geoJson });
     this.map.addLayer({
       id: "singles",
@@ -282,7 +319,7 @@ export class MapService {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
 
     function forwardGeocoder(query: string) {
-      console.log(query)
+
       const matchingFeatures = [] as Result[];
       const uniqueNames: string[] = [];
       for (const feature of data.features) {
@@ -337,7 +374,7 @@ export class MapService {
         ])
 
       const source = this.map.getSource('locations');
-      console.log(source);
+
       const userLocations = this.geoJsonSubject.value.features
         .filter(y => y.properties?.username === result.properties.username)
         .map(x => {
@@ -350,7 +387,6 @@ export class MapService {
       // })
       // const unique = this.getUniqueFeatures(test, '_id');
       // //
-      // console.log(test);
       const start = userLocations[0];
       if (userLocations.length > 1) {
         const startLngLat = new mapboxgl.LngLat(start[0], start[1]);
