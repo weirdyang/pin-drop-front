@@ -1,0 +1,23 @@
+
+:host {
+    --main-sat: 173;
+    --darken: rgba(26, 29, 37, 0.8);
+    --opacity: 0.8;
+    --main-color: hsla(var(--main-sat), 100%, 50%, 1);
+
+    * {
+      box-sizing: border-box;
+    }
+}
+.hm {
+    &-section {
+        width: 100%;
+        min-width: 100%;
+        height: 100%;
+        display: grid;
+    }
+
+}
+.controls {
+    max-height: 25px;
+}

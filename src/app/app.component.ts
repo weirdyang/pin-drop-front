@@ -16,11 +16,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.mapService.constructMap();
-
-    this.mapService.addGeocoder();
-    console.log(this.mapService.geoJson);
-    this.mapService.addLocalSearch();
+    console.log('in init')
 
   }
 }

@@ -5,12 +5,13 @@ import mapboxgl, { GeoJSONSource, Point } from 'mapbox-gl';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreatePinComponent } from '../pin/create-pin/create-pin.component';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, Subject, Subscription } from 'rxjs';
 import { PinService } from './pin.service';
 import { IPinData } from '../types/pin';
 import * as GeoJSON from 'geojson'
 import { DynamicComponentService } from './dynamic-component.service';
 import { PopUpComponent } from '../pin/pop-up/pop-up.component';
+import { catchError, concatMap, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 
 
 @Injectable({
@@ -30,10 +31,41 @@ export class MapService {
   localSearch!: MapboxGeocoder;
   dialogSubscription?: Subscription;
   lastMarker: mapboxgl.Marker = new mapboxgl.Marker();
-  geoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+
+  private readySubject = new BehaviorSubject<boolean>(false);
+
+  ready$ = this.readySubject.asObservable().pipe(shareReplay(1));
+
+  private setUpSubject = new Subject<boolean>();
+  setUp$ = this.setUpSubject.asObservable()
+    .pipe(shareReplay(1));
+
+  private geoJsonSubject = new BehaviorSubject<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({
     type: 'FeatureCollection',
     features: [] as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
+  })
+  geoJson$ = this.geoJsonSubject.asObservable()
+    .pipe(
+      shareReplay(1),
+      catchError(err => of({} as GeoJSON.FeatureCollection<GeoJSON.Geometry>))
+    )
+
+  private updateSubject = new BehaviorSubject<boolean>(false);
+  update$ = this.updateSubject.asObservable().pipe(shareReplay(1));
+  updateData(update: boolean) {
+    this.updateSubject.next(update);
   }
+  refreshData$ = this.update$.pipe(
+    filter(x => x === true),
+    switchMap(() =>
+      this.markers$.pipe(
+        tap((data) => {
+          const source = this.map.getSource('locations') as GeoJSONSource;
+          source.setData(data);
+          this.refreshLocalSearch();
+        })
+      )
+    ));
   addGeocoder() {
     const map = this.map;
     const geocoder = new MapboxGeocoder({
@@ -64,31 +96,52 @@ export class MapService {
     this.geocoder = geocoder;
   }
 
-  getMarkers() {
-    this.pinService.getPins()
-      .subscribe(data => {
-        //console.log(data);
-        for (let point of data as IPinData[]) {
-          let coordinate = [point.long, point.lat];
-          if (point.lat > 90 || point.lat < -90) {
-            continue;
-          }
-          let feature = {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: coordinate
-            },
-            properties: point
-          } as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>;
-          this.geoJson.features.push(feature as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>);
-        }
-        const source = this.map.getSource('locations') as GeoJSONSource;
-        source.setData(this.geoJson);
-        console.log(this.geoJson);
 
-      })
-  }
+  markers$ = this.pinService.pins$
+    .pipe(map(data => {
+
+      const geoJson = {
+        type: 'FeatureCollection',
+        features: [] as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
+      } as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+      const points: number[][] = [];
+      for (let point of data as IPinData[]) {
+        let coordinate = [point.long, point.lat];
+        if (point.lat > 90 || point.lat < -90) {
+          continue;
+        }
+        if (points.find(x => x[0] === point.long && x[1] === point.lat)) {
+          let latRnd = Math.random() * 0.001;
+          let longRnd = Math.random() * 0.001;
+          if (Date.now() % 2 === 0) {
+            coordinate = [
+              point.long + longRnd,
+              point.lat + latRnd,
+            ]
+          } else {
+            coordinate = [
+              point.long - longRnd,
+              point.lat - latRnd,
+            ]
+          }
+        }
+        let feature = {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: coordinate
+          },
+          properties: point
+        } as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>;
+        geoJson.features.push(
+          feature as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>);
+        points.push(coordinate);
+      }
+
+      this.geoJsonSubject.next(geoJson);
+      return geoJson
+    }))
+
   closePopUps() {
     var popUps = document.getElementsByClassName('mapboxgl-popup');
     /** Check if there is already a popup on the map and if so, remove it */
@@ -124,30 +177,65 @@ export class MapService {
   }
   // long, lat
   center: mapboxgl.LngLatLike = [73, 42];
+  containerId = 'map';
+  mapStyle = 'mapbox://styles/mapbox/light-v10';
+  updateSettings(id: string, style: string) {
+    this.containerId = id;
+    this.mapStyle = style;
+  }
   constructMap() {
     this.map = new mapboxgl.Map({
       accessToken: mapboxToken,
-      container: 'map',
-      style: "mapbox://styles/mapbox/light-v10",
+      container: this.containerId,
+      style: this.mapStyle,
       center: this.center,
       zoom: this.initialZoom
     });
-    this.map.on('load', () => {
 
-      this.addLayerAndSources();
+    this.map.on('load', (ev) => {
       this.setupMarkers();
+      this.readySubject.next(true);
     });
   }
   setupMarkers() {
-    this.getMarkers();
     this.map.on("click", "locations", (e: mapboxgl.EventData) => {
       let clickedPoint = e.features[0];
       this.createPopUp(clickedPoint);
     });
   }
+  setUpMap$ = this.ready$
+    .pipe(
+      filter(ready => ready === true),
+      switchMap(ready =>
+        this.markers$.pipe(
+          tap(x => this.addLayerAndSources(x)),
+          tap(_ => this.addGeocoder()),
+          tap(x => this.addLocalSearch(x)),
+          tap(_ => this.setupMarkers()),
+          tap(_ => this.setUpSubject.next(true))
+        )
+      )
+    )
 
-  addLayerAndSources() {
-    this.map.addSource("locations", { type: "geojson", data: this.geoJson });
+  createMap$ = this.markers$.pipe(
+    tap(_ => this.constructMap()),
+    switchMap(() =>
+      this.ready$.pipe(
+        filter(ready => ready === true),
+        tap(x => {
+
+          this.addLayerAndSources(this.geoJsonSubject.value);
+          this.addGeocoder();
+          this.addLocalSearch(this.geoJsonSubject.value);
+          this.setupMarkers();
+          this.setUpSubject.next(true);
+        })
+      )
+    )
+  )
+  addLayerAndSources(geoJson: GeoJSON.FeatureCollection<GeoJSON.Geometry>) {
+
+    this.map.addSource("locations", { type: "geojson", data: geoJson });
     this.map.addLayer({
       id: "singles",
       // type: "symbol",
@@ -202,7 +290,7 @@ export class MapService {
 
   refreshLocalSearch() {
     this.map.removeControl(this.localSearch);
-    this.addLocalSearch();
+    this.addLocalSearch(this.geoJsonSubject.value);
   }
 
   // Because features come from tiled vector data,
@@ -227,11 +315,11 @@ export class MapService {
     }
     return uniqueFeatures;
   }
-  addLocalSearch() {
+  addLocalSearch(data: GeoJSON.FeatureCollection<GeoJSON.Geometry>) {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    const data = this.geoJson;
+
     function forwardGeocoder(query: string) {
-      console.log(query)
+
       const matchingFeatures = [] as Result[];
       const uniqueNames: string[] = [];
       for (const feature of data.features) {
@@ -286,8 +374,8 @@ export class MapService {
         ])
 
       const source = this.map.getSource('locations');
-      console.log(source);
-      const userLocations = this.geoJson.features
+
+      const userLocations = this.geoJsonSubject.value.features
         .filter(y => y.properties?.username === result.properties.username)
         .map(x => {
           const point = x.geometry as GeoJSON.Point;
@@ -299,7 +387,6 @@ export class MapService {
       // })
       // const unique = this.getUniqueFeatures(test, '_id');
       // //
-      // console.log(test);
       const start = userLocations[0];
       if (userLocations.length > 1) {
         const startLngLat = new mapboxgl.LngLat(start[0], start[1]);

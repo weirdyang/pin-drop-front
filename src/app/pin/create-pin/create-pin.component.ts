@@ -66,11 +66,11 @@ export class CreatePinComponent {
     this.pinService.createPin(this.form.value)
       .subscribe({
         next: response => {
+          this.dialogRef.close();
           this.snackBar.open('Pin created!')
           this.mapService.lastMarker.remove();
-          this.mapService.getMarkers();
-          this.mapService.refreshLocalSearch();
-          this.dialogRef.close();
+          this.mapService.updateData(true);
+
         },
         error: (err: HttpErrorResponse) => {
 
