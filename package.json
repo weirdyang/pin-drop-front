@@ -23,6 +23,7 @@
     "@angular/router": "~12.2.0",
     "@mapbox/mapbox-gl-geocoder": "^4.7.4",
     "mapbox-gl": "^2.6.1",
+    "mgl-spiderifier": "^0.1.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
@@ -37,8 +38,8 @@
     "@angular/cli": "~12.2.12",
     "@angular/compiler-cli": "~12.2.0",
     "@types/jasmine": "~3.8.0",
-    "@types/mapbox-gl": "^2.6.0",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.2",
+    "@types/mapbox-gl": "^2.6.0",
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "4.28.2",
     "@typescript-eslint/parser": "4.28.2",

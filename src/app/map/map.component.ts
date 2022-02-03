@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { MapService } from '../services/map.service';
+import { IPinData } from '../types/pin';
 
 @Component({
   selector: 'app-map',
@@ -37,6 +38,12 @@ export class MapComponent implements OnInit, OnDestroy {
       this.mapService.refreshData$.pipe(
         takeUntil(this.destroy$)
       ).subscribe();
+
+    this.mapService.spiders$.subscribe(
+      ([geo, data]) => {
+        this.mapService.constructSpiders(data as IPinData[]);
+      }
+    )
   }
 
 }

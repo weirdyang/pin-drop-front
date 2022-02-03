@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { mapboxToken } from '../config';
 import MapboxGeocoder, { Result } from '@mapbox/mapbox-gl-geocoder';
-import mapboxgl, { GeoJSONSource, Point } from 'mapbox-gl';
+import mapboxgl, { Coordinate, GeoJSONSource, MercatorCoordinate, Point } from 'mapbox-gl';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreatePinComponent } from '../pin/create-pin/create-pin.component';
@@ -12,8 +12,13 @@ import * as GeoJSON from 'geojson'
 import { DynamicComponentService } from './dynamic-component.service';
 import { PopUpComponent } from '../pin/pop-up/pop-up.component';
 import { catchError, concatMap, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { MapboxglSpiderifier } from 'mgl-spiderifier';
 
-
+interface Clusters {
+  long: number;
+  lat: number;
+  features: GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -96,10 +101,82 @@ export class MapService {
     this.geocoder = geocoder;
   }
 
+  findDuplicates(array: IPinData[]) {
+    const results: Clusters[] = [];
+    for (let point of array) {
+      if (point.lat > 90 || point.lat < -90) {
+        continue;
+      }
+      let coordinate = [point.long, point.lat];
+      let feature = {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: coordinate
+        },
+        properties: point
+      } as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>;
+
+      if (results.find(x => x.lat == point.lat && x.long === point.long)) {
+        let existingCluster = results.filter(x => x.lat == point.lat && x.long === point.long)[0];
+        existingCluster.features.push(feature);
+      } else {
+
+        let cluster = {
+          lat: point.lat,
+          long: point.long,
+          features: []
+        } as Clusters
+        cluster.features.push(feature);
+        results.push(cluster);
+      }
+    }
+    console.log(results);
+    return results;
+  }
+  spiderifiers: MapboxglSpiderifier[] = [];
+  constructSpiders(data: IPinData[]) {
+    console.log(data);
+
+    const clusters = this.findDuplicates(data)
+    console.log(clusters, 'clusters');
+    for (let cluster of clusters) {
+      let spiderifier = new MapboxglSpiderifier(this.map, {
+        animate: true,
+        animationSpeed: 200,
+        circleFootSeparation: 500,
+        onClick: function (e: any, spiderLeg: any) {
+          console.log(spiderLeg);
+        },
+      });
+      spiderifier.spiderfy([cluster.long, cluster.lat], cluster.features)
+      this.spiderifiers.push(spiderifier);
+    }
+  }
+
+  spiders$ = this.pinService.pins$
+    .pipe(
+      map(data => {
+        const clusters = this.findDuplicates(data);
+        const geoJson = {
+          type: 'FeatureCollection',
+          features: [] as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
+        } as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+        for (let cluster of clusters) {
+          let feature = {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [cluster.long, cluster.lat]
+            },
+            properties: cluster
+          } as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>;
+        }
+        return [geoJson, data];
+      }))
 
   markers$ = this.pinService.pins$
     .pipe(map(data => {
-
       const geoJson = {
         type: 'FeatureCollection',
         features: [] as GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>[]
@@ -110,21 +187,7 @@ export class MapService {
         if (point.lat > 90 || point.lat < -90) {
           continue;
         }
-        if (points.find(x => x[0] === point.long && x[1] === point.lat)) {
-          let latRnd = Math.random() * 0.001;
-          let longRnd = Math.random() * 0.001;
-          if (Date.now() % 2 === 0) {
-            coordinate = [
-              point.long + longRnd,
-              point.lat + latRnd,
-            ]
-          } else {
-            coordinate = [
-              point.long - longRnd,
-              point.lat - latRnd,
-            ]
-          }
-        }
+        coordinate = this.modifyDuplicates(points, point, coordinate);
         let feature = {
           type: "Feature",
           geometry: {
@@ -141,6 +204,25 @@ export class MapService {
       this.geoJsonSubject.next(geoJson);
       return geoJson
     }))
+
+  private modifyDuplicates(points: number[][], point: IPinData, coordinate: number[]) {
+    if (points.find(x => x[0] === point.long && x[1] === point.lat)) {
+      let latRnd = Math.random() * 0.001;
+      let longRnd = Math.random() * 0.001;
+      if (Date.now() % 2 === 0) {
+        coordinate = [
+          point.long + longRnd,
+          point.lat + latRnd,
+        ];
+      } else {
+        coordinate = [
+          point.long - longRnd,
+          point.lat - latRnd,
+        ];
+      }
+    }
+    return coordinate;
+  }
 
   closePopUps() {
     var popUps = document.getElementsByClassName('mapboxgl-popup');
